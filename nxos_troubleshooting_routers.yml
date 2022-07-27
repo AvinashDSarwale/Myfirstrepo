@@ -1,0 +1,59 @@
+---
+- name: interfaces troubleshooting routers
+  hosts: localhosts
+  
+  tasks:
+  hosts: routers
+  
+    - name: executing show commands
+      nxos_command:
+         commands:      
+           - show ip interfaces brief
+      register: int
+    
+    - debug: 
+        var: int
+        
+    - name: executing show commands
+      nxos_command:
+         commands:      
+           - show interface GigabitEthernet2
+      register: int_output
+    
+    - debug: 
+        var: int_output
+        
+    - name: interface configuration
+      nxos_interface:
+         config:
+           - name: interface GigabitEthernet2
+             description: Ansible Configured
+             enabled: yes
+             mtu: 
+             speed: 1000
+         state: merged
+      register: int_config
+      
+    - debug:
+        var: int_config.before
+    - debug:
+        var: int_config.commands 
+    - debug:
+        var: int_config.after
+        
+    - name: configure interface with IP
+      nxos_config:
+         parents: interface GigabitEthernet2
+         lines:
+           - no shutdown
+         save_when: modified
+         
+      register: int_config_IP
+      
+      debug: 
+        var: int_config_IP
+      
+  
+   
+  
+   
